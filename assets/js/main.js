@@ -30,14 +30,12 @@ class board {
             }
             tempBoard.push(row);
         }
-        console.log(tempBoard);
         return tempBoard;
     }
 
     draw(ctx) {
         ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
         const cellSize = ctx.canvas.width / this.size;
-        console.log(this.grid);
         this.grid.forEach((row) => {
             row.forEach((cell) => {
                 ctx.fillStyle = cell.alive ? "black" : "white";
@@ -46,12 +44,18 @@ class board {
             });
         });
     }
+
+    toggleCell(x, y) {
+        this.grid[x][y].toggle();
+    }
 }
 
 const canvas = document.getElementById("canvas");
 const ctx = canvas.getContext("2d");
 const sizeInput = document.getElementById("size");
 const randomBtn = document.getElementById("random");
+const manualBtn = document.getElementById("manual");
+
 let gameBoard = null;
 
 function adjustCanvas(canvas, size) {
@@ -60,13 +64,31 @@ function adjustCanvas(canvas, size) {
     canvas.height = cellSize * size;
 }
 
+canvas.addEventListener("click", (event) => {
+    if (!gameBoard) {
+        alert("Se requiere crear un tablero primero");
+        return;
+    };
+    const rect = canvas.getBoundingClientRect();
+    const cellSize = rect.width / gameBoard.size;
+
+    const x = Math.floor((event.clientY - rect.top) / cellSize);
+    const y = Math.floor((event.clientX - rect.left) / cellSize);
+    
+    gameBoard.toggleCell(x, y);
+    gameBoard.draw(ctx);
+});
 
 randomBtn.addEventListener("click", () => {
-    console.log("Random button clicked");
     const size = parseInt(sizeInput.value);
     adjustCanvas(canvas, size);
     gameBoard = new board(size, true);
     gameBoard.draw(ctx);
 });
 
-
+manualBtn.addEventListener("click", () => {
+    const size = parseInt(sizeInput.value);
+    adjustCanvas(canvas, size);
+    gameBoard = new board(size, false);
+    gameBoard.draw(ctx);
+});
